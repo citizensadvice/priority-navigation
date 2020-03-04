@@ -1,5 +1,5 @@
 /*
- * priority-nav - v1.0.14 | (c) 2020 @gijsroge | MIT license
+ * priority-nav - v1.1.0 | (c) 2020 @gijsroge | MIT license
  * Repository: https://github.com/gijsroge/priority-navigation.git
  * Description: Priority+ pattern navigation that hides menu items if they don't fit on screen.
  * Demo: http://gijsroge.github.io/priority-nav.js/
@@ -143,6 +143,23 @@
       if (callNow) func.apply(context, args);
     };
   }
+
+  /**
+   * return true if el has a parent
+   * @param el
+   * @param parent
+   */
+
+  var parent = function(el, parent) {
+    while (el !== null) {
+      if (el.parentNode === parent) {
+        return true;
+      } else {
+        el = el.parentNode;
+      }
+    }
+    return false;
+  };
 
   /**
    * Toggle class on element
@@ -544,7 +561,8 @@
     // Toggle dropdown
     _this
       .querySelector(navDropdownToggle)
-      .addEventListener("click", function() {
+      .addEventListener("mousedown", function(event) {
+        event.stopPropagation();
         toggleClass(_this.querySelector(navDropdown), "show");
         toggleClass(this, "is-open");
         toggleClass(_this, "is-open");
@@ -557,6 +575,46 @@
         } else {
           _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
           _this.querySelector(navDropdown).blur();
+        }
+      });
+
+    _this
+      .querySelector(navDropdownToggle)
+      .addEventListener("focus", function(event) {
+        if (-1 === _this.className.indexOf("is-open")) {
+          toggleClass(_this.querySelector(navDropdown), "show");
+          toggleClass(this, "is-open");
+          toggleClass(_this, "is-open");
+
+          /**
+           * Toggle aria hidden for accessibility
+           */
+          _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
+          _this.querySelector(navDropdown).blur();
+        }
+      });
+
+    _this
+      .querySelector(navDropdownToggle)
+      .addEventListener("blur", function(e) {
+        if (!parent(e.relatedTarget, toggleWrapper)) {
+          toggleClass(_this.querySelector(navDropdown), "show");
+          toggleClass(this, "is-open");
+          toggleClass(_this, "is-open");
+
+          /**
+           * Toggle aria hidden for accessibility
+           */
+          if (-1 !== _this.className.indexOf("is-open")) {
+            _this
+              .querySelector(navDropdown)
+              .setAttribute("aria-hidden", "false");
+          } else {
+            _this
+              .querySelector(navDropdown)
+              .setAttribute("aria-hidden", "true");
+            _this.querySelector(navDropdown).blur();
+          }
         }
       });
 

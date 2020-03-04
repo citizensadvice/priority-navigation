@@ -1,7 +1,7 @@
 {
   "name": "@baseonmars/priority-nav",
   "title": "priority-nav",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "dist/priority-nav.js",
   "description": "Priority+ pattern navigation that hides menu items if they don't fit on screen.",
   "homepage": "http://gijsroge.github.io/priority-nav.js/",
@@ -9,6 +9,13 @@
     "name": "Gijs Rogé",
     "url": "http://twitter.com/gijsroge"
   },
+  "contributors": [
+    {
+      "name": "Dan Cseko",
+      "email": "dan@baseonmars.co.uk",
+      "url": "https://baseonmars.co.uk"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/gijsroge/priority-navigation.git"
