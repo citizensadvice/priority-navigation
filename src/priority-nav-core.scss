@@ -6,47 +6,47 @@
  * http://twitter.com/GijsRoge
  */
 
-.priority-nav{
-
+.priority-nav {
   white-space: nowrap; // prevent flash of unstyled content
 
   /*
     * Makes sure the menu's are inline-block so they don't take up
     * the entire width of its parent. This will break the plugin.
     */
-  > ul{
+  > ul {
     display: inline-block;
-    > li{
+    > li {
       display: inline-block;
     }
   }
-  &-has-dropdown{
-    .priority-nav{
-      &__dropdown{
-        &-toggle{
+  &-has-dropdown {
+    .priority-nav {
+      &__dropdown {
+        &-toggle {
           position: relative;
         }
       }
     }
   }
-  &__wrapper{
+  &__wrapper {
     position: relative;
   }
-  &__dropdown{
+  &__dropdown {
+    z-index: 1000;
     position: absolute;
     visibility: hidden;
-    &.show{
+    &.show {
       visibility: visible;
     }
-    &-toggle{
+    &-toggle {
       visibility: hidden;
       position: absolute;
     }
   }
-  &-is-visible{
+  &-is-visible {
     visibility: visible;
   }
-  &-is-hidden{
+  &-is-hidden {
     visibility: hidden;
   }
 }

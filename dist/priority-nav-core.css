@@ -30,6 +30,7 @@
 }
 
 .priority-nav__dropdown {
+  z-index: 1000;
   position: absolute;
   visibility: hidden;
 }

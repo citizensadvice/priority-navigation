@@ -143,7 +143,6 @@
    * @param el
    * @param parent
    */
-
   var parent = function(el, parent) {
     while (el !== null) {
       if (el.parentNode === parent) {
@@ -171,6 +170,25 @@
       else classes.push(className);
 
       el.className = classes.join(" ");
+    }
+  };
+
+  var removeClass = function(el, className) {
+    if (el.classList) {
+      el.classList.remove(className);
+    } else {
+      el.className = el.className.replace(
+        new RegExp("s?" + className + "s?"),
+        ""
+      );
+    }
+  };
+
+  var addClass = function(el, className) {
+    if (el.classList) {
+      el.classList.add(className);
+    } else {
+      el.className = el.className + " " + className;
     }
   };
 
@@ -572,13 +590,22 @@
         }
       });
 
+    var lastItemCloseHandler = function(event) {
+      removeClass(_this.querySelector(navDropdown), "show");
+      removeClass(_this.querySelector(navDropdownToggle), "is-open");
+      removeClass(_this, "is-open");
+      _this
+        .querySelector(navDropdown + " li:last-child a")
+        .removeEventListener("blur", lastItemCloseHandler);
+    };
+
     _this
       .querySelector(navDropdownToggle)
       .addEventListener("focus", function(event) {
         if (-1 === _this.className.indexOf("is-open")) {
-          toggleClass(_this.querySelector(navDropdown), "show");
-          toggleClass(this, "is-open");
-          toggleClass(_this, "is-open");
+          addClass(_this.querySelector(navDropdown), "show");
+          addClass(this, "is-open");
+          addClass(_this, "is-open");
 
           /**
            * Toggle aria hidden for accessibility
@@ -592,9 +619,14 @@
       .querySelector(navDropdownToggle)
       .addEventListener("blur", function(e) {
         if (!parent(e.relatedTarget, toggleWrapper)) {
-          toggleClass(_this.querySelector(navDropdown), "show");
-          toggleClass(this, "is-open");
-          toggleClass(_this, "is-open");
+          // clean up
+          document
+            .querySelector(navDropdown + " li:last-child a")
+            .removeEventListener("blur", lastItemCloseHandler);
+
+          removeClass(_this.querySelector(navDropdown), "show");
+          removeClass(this, "is-open");
+          removeClass(_this, "is-open");
 
           /**
            * Toggle aria hidden for accessibility
@@ -609,8 +641,16 @@
               .setAttribute("aria-hidden", "true");
             _this.querySelector(navDropdown).blur();
           }
+        } else {
+          document
+            .querySelector(navDropdown + " li:last-child a")
+            .addEventListener("blur", lastItemCloseHandler);
         }
       });
+
+    /*
+     * Close menu when last item is selected
+     */
 
     /*
      * Remove when clicked outside dropdown
