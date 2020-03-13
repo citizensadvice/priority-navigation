@@ -124,6 +124,7 @@
    */
   function debounce(func, wait, immediate) {
     var timeout;
+    var finishedTimeout;
     return function() {
       var context = this,
         args = arguments;
@@ -135,6 +136,12 @@
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
       if (callNow) func.apply(context, args);
+
+      // Safari requires this to correctly fire resize when leaving fullscreen mode.
+      clearTimeout(finishedTimeout);
+      finishedTimeout = setTimeout(function() {
+        func.apply(context, args);
+      }, 600);
     };
   }
 
@@ -553,13 +560,9 @@
         if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
       });
     } else if (window.addEventListener) {
-      window.addEventListener(
-        "resize",
-        function() {
-          if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
-        },
-        true
-      );
+      window.addEventListener("resize", function() {
+        if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
+      });
 
       window.addEventListener(
         "orientationchange",
