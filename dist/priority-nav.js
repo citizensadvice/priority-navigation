@@ -56,6 +56,10 @@
     movedBack: function() {}
   };
 
+  var blurEventName = MouseEvent.prototype.hasOwnProperty("relatedTarget")
+    ? "focusout"
+    : "blur";
+
   /**
    * A simple forEach() implementation for Arrays, Objects and NodeLists
    * @private
@@ -147,7 +151,7 @@
       clearTimeout(finishedTimeout);
       finishedTimeout = setTimeout(function() {
         func.apply(context, args);
-      }, 600);
+      }, 800);
     };
   }
 
@@ -605,7 +609,7 @@
       removeClass(_this, "is-open");
       _this
         .querySelector(navDropdown + " li:last-child a")
-        .removeEventListener("blur", lastItemCloseHandler);
+        .removeEventListener(blurEventName, lastItemCloseHandler);
     };
 
     _this
@@ -626,12 +630,12 @@
 
     _this
       .querySelector(navDropdownToggle)
-      .addEventListener("blur", function(e) {
+      .addEventListener(blurEventName, function(e) {
         if (!parent(e.relatedTarget, toggleWrapper)) {
           // clean up
           document
             .querySelector(navDropdown + " li:last-child a")
-            .removeEventListener("blur", lastItemCloseHandler);
+            .removeEventListener(blurEventName, lastItemCloseHandler);
 
           removeClass(_this.querySelector(navDropdown), "show");
           removeClass(this, "is-open");
@@ -653,7 +657,7 @@
         } else {
           document
             .querySelector(navDropdown + " li:last-child a")
-            .addEventListener("blur", lastItemCloseHandler);
+            .addEventListener(blurEventName, lastItemCloseHandler);
         }
       });
 
