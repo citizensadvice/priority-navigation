@@ -19,6 +19,11 @@
       display: inline-block;
     }
   }
+
+  #priorityNavLabel {
+    display: none;
+  }
+
   &-has-dropdown {
     .priority-nav {
       &__dropdown {

@@ -1,10 +1,10 @@
 /*
- * priority-nav - v1.3.0 | (c) 2020 @gijsroge | MIT license
+ * priority-nav - v1.3.1 | (c) 2020 @gijsroge | MIT license
  * Repository: https://github.com/gijsroge/priority-navigation.git
  * Description: Priority+ pattern navigation that hides menu items if they don't fit on screen.
  * Demo: http://gijsroge.github.io/priority-nav.js/
  */
-(function(root, factory) {
+(function (root, factory) {
   if (typeof define === "function" && define.amd) {
     define("priorityNav", factory(root));
   } else if (typeof exports === "object") {
@@ -12,7 +12,7 @@
   } else {
     root.priorityNav = factory(root);
   }
-})(window || this, function(root) {
+})(window || this, function (root) {
   "use strict";
 
   /**
@@ -30,6 +30,7 @@
     mainNav,
     navDropdown,
     navDropdownToggle,
+    navDropdownToggleLabel,
     dropDownWidth,
     toggleWrapper;
   var viewportWidth = 0;
@@ -44,7 +45,9 @@
     mainNav: "ul", // mainnav selector. (must be inline-block)
     navDropdownClassName: "nav__dropdown", // class used for the dropdown.
     navDropdownToggleClassName: "nav__dropdown-toggle", // class used for the dropdown toggle.
-    navDropdownLabel: "more", // Text that is used for the dropdown toggle.
+    navDropdownToggleAriaLabel: "More navigation options",
+    navDropdownLabel: "More", // Text that is used for the dropdown toggle.
+    navDropdownLabelActive: "Close", // Text that is used for the dropdown toggle when menu is open
     navDropdownBreakpointLabel: "menu", //button label for navDropdownToggle when the breakPoint is reached.
     breakPoint: 500, //amount of pixels when all menu items should be moved to dropdown to simulate a mobile menu
     throttleDelay: 50, // this will throttle the calculating logic on resize because i'm a responsible dev.
@@ -52,8 +55,8 @@
     count: true, // prints the amount of items are moved to the attribute data-count to style with css counter.
 
     //Callbacks
-    moved: function() {},
-    movedBack: function() {}
+    moved: function () {},
+    movedBack: function () {},
   };
 
   var blurEventName = MouseEvent.prototype.hasOwnProperty("relatedTarget")
@@ -67,7 +70,7 @@
    * @param {Function} callback Callback function for each iteration
    * @param {Array|Object|NodeList} scope Object/NodeList/Array that forEach is iterating over (aka `this`)
    */
-  var forEach = function(collection, callback, scope) {
+  var forEach = function (collection, callback, scope) {
     if (Object.prototype.toString.call(collection) === "[object Object]") {
       for (var prop in collection) {
         if (Object.prototype.hasOwnProperty.call(collection, prop)) {
@@ -87,7 +90,7 @@
    * @param {String} selector Selector to match against (class, ID, or data attribute)
    * @return {Boolean|Element} Returns false if not match found
    */
-  var getClosest = function(elem, selector) {
+  var getClosest = function (elem, selector) {
     var firstChar = selector.charAt(0);
     for (; elem && elem !== document; elem = elem.parentNode) {
       if (firstChar === ".") {
@@ -114,12 +117,12 @@
    * @param {Object} options User options
    * @returns {Object} Merged values of defaults and options
    */
-  var extend = function(defaults, options) {
+  var extend = function (defaults, options) {
     var extended = {};
-    forEach(defaults, function(value, prop) {
+    forEach(defaults, function (value, prop) {
       extended[prop] = defaults[prop];
     });
-    forEach(options, function(value, prop) {
+    forEach(options, function (value, prop) {
       extended[prop] = options[prop];
     });
     return extended;
@@ -135,10 +138,10 @@
   function debounce(func, wait, immediate) {
     var timeout;
     var finishedTimeout;
-    return function() {
+    return function () {
       var context = this,
         args = arguments;
-      var later = function() {
+      var later = function () {
         timeout = null;
         if (!immediate) func.apply(context, args);
       };
@@ -149,7 +152,7 @@
 
       // Safari requires this to correctly fire resize when leaving fullscreen mode.
       clearTimeout(finishedTimeout);
-      finishedTimeout = setTimeout(function() {
+      finishedTimeout = setTimeout(function () {
         func.apply(context, args);
       }, 800);
     };
@@ -160,7 +163,7 @@
    * @param el
    * @param parent
    */
-  var parent = function(el, parent) {
+  var parent = function (el, parent) {
     while (el !== null) {
       if (el.parentNode === parent) {
         return true;
@@ -176,7 +179,7 @@
    * @param el
    * @param className
    */
-  var toggleClass = function(el, className) {
+  var toggleClass = function (el, className) {
     if (el.classList) {
       el.classList.toggle(className);
     } else {
@@ -190,7 +193,7 @@
     }
   };
 
-  var removeClass = function(el, className) {
+  var removeClass = function (el, className) {
     if (el.classList) {
       el.classList.remove(className);
     } else {
@@ -201,7 +204,7 @@
     }
   };
 
-  var addClass = function(el, className) {
+  var addClass = function (el, className) {
     if (el.classList) {
       el.classList.add(className);
     } else {
@@ -213,7 +216,7 @@
    * Check if dropdown menu is already on page before creating it
    * @param mainNavWrapper
    */
-  var prepareHtml = function(_this, settings) {
+  var prepareHtml = function (_this, settings) {
     /**
      * Create dropdow menu
      * @type {HTMLElement}
@@ -221,6 +224,7 @@
     toggleWrapper = document.createElement("span");
     navDropdown = document.createElement("ul");
     navDropdownToggle = document.createElement("button");
+    navDropdownToggleLabel = document.createElement("span");
 
     /**
      * Set label for dropdown toggle
@@ -228,11 +232,15 @@
      */
     navDropdownToggle.innerHTML = settings.navDropdownLabel;
 
+    navDropdownToggleLabel.innerHTML = settings.navDropdownToggleAriaLabel;
+
     /**
      * Set aria attributes for accessibility
      */
-    navDropdownToggle.setAttribute("aria-controls", "menu");
+    navDropdownToggle.setAttribute("aria-expanded", "false");
     navDropdownToggle.setAttribute("type", "button");
+    navDropdownToggle.setAttribute("aria-labelledby", "priorityNavLabel");
+    navDropdownToggleLabel.setAttribute("id", "priorityNavLabel");
     navDropdown.setAttribute("aria-hidden", "true");
 
     /**
@@ -247,6 +255,7 @@
 
     _this.insertAfter(toggleWrapper, _this.querySelector(mainNav));
 
+    toggleWrapper.appendChild(navDropdownToggleLabel);
     toggleWrapper.appendChild(navDropdownToggle);
     toggleWrapper.appendChild(navDropdown);
 
@@ -273,7 +282,7 @@
    * @param element
    * @returns {number}
    */
-  var getElementContentWidth = function(element) {
+  var getElementContentWidth = function (element) {
     var styles = window.getComputedStyle(element);
     var padding =
       parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
@@ -285,7 +294,7 @@
    * Get viewport size
    * @returns {{width: number, height: number}}
    */
-  var viewportSize = function() {
+  var viewportSize = function () {
     var doc = document,
       w = window;
     var docEl =
@@ -310,7 +319,7 @@
    * @param elem
    * @returns {number}
    */
-  var calculateWidths = function(_this) {
+  var calculateWidths = function (_this) {
     totalWidth = getElementContentWidth(_this);
     //Check if parent is the navwrapper before calculating its width
     if (_this.querySelector(navDropdown).parentNode === _this) {
@@ -326,7 +335,7 @@
    * Move item to array
    * @param item
    */
-  priorityNav.doesItFit = function(_this) {
+  priorityNav.doesItFit = function (_this) {
     /**
      * Check if it is the first run
      */
@@ -341,7 +350,7 @@
     /**
      * Debounced execution of the main logic
      */
-    debounce(function() {
+    debounce(function () {
       /**
        * Get the current element"s instance
        * @type {string}
@@ -368,7 +377,7 @@
         calculateWidths(_this, identifier);
         //update dropdownToggle label
         if (viewportWidth < settings.breakPoint)
-          updateLabel(_this, identifier, settings.navDropdownBreakpointLabel);
+          updateLabel(_this, settings.navDropdownBreakpointLabel);
       }
 
       /**
@@ -382,7 +391,7 @@
         priorityNav.toMenu(_this, identifier);
         //update dropdownToggle label
         if (viewportWidth > settings.breakPoint)
-          updateLabel(_this, identifier, settings.navDropdownLabel);
+          updateLabel(_this, settings.navDropdownLabel);
       }
 
       /**
@@ -391,7 +400,7 @@
       if (breaks[identifier].length < 1) {
         _this.querySelector(navDropdown).classList.remove("show");
         //show navDropdownLabel
-        updateLabel(_this, identifier, settings.navDropdownLabel);
+        updateLabel(_this, settings.navDropdownLabel);
       }
 
       /**
@@ -400,7 +409,7 @@
       if (_this.querySelector(mainNav).children.length < 1) {
         //show navDropdownBreakpointLabel
         _this.classList.add("is-empty");
-        updateLabel(_this, identifier, settings.navDropdownBreakpointLabel);
+        updateLabel(_this, settings.navDropdownBreakpointLabel);
       } else {
         _this.classList.remove("is-empty");
       }
@@ -415,7 +424,7 @@
   /**
    * Show/hide toggle button
    */
-  var showToggle = function(_this, identifier) {
+  var showToggle = function (_this, identifier) {
     if (breaks[identifier].length < 1) {
       _this
         .querySelector(navDropdownToggle)
@@ -452,20 +461,29 @@
   /**
    * Update count on dropdown toggle button
    */
-  var updateCount = function(_this, identifier) {
+  var updateCount = function (_this, identifier) {
     _this
       .querySelector(navDropdownToggle)
       .setAttribute("priorityNav-count", breaks[identifier].length);
   };
 
-  var updateLabel = function(_this, identifier, label) {
+  var updateLabel = function (_this, label) {
     _this.querySelector(navDropdownToggle).innerHTML = label;
+    if (label === settings.navDropdownLabelActive) {
+      _this
+        .querySelector(navDropdownToggle)
+        .setAttribute("aria-expanded", "true");
+    } else {
+      _this
+        .querySelector(navDropdownToggle)
+        .setAttribute("aria-expanded", "false");
+    }
   };
 
   /**
    * Move item to dropdown
    */
-  priorityNav.toDropdown = function(_this, identifier) {
+  priorityNav.toDropdown = function (_this, identifier) {
     /**
      * move last child of navigation menu to dropdown
      */
@@ -511,7 +529,7 @@
   /**
    * Move item to menu
    */
-  priorityNav.toMenu = function(_this, identifier) {
+  priorityNav.toMenu = function (_this, identifier) {
     /**
      * move last child of navigation menu to dropdown
      */
@@ -547,7 +565,7 @@
    * Count width of children and return the value
    * @param e
    */
-  var getChildrenWidth = function(e) {
+  var getChildrenWidth = function (e) {
     var children = e.childNodes;
     var sum = 0;
     for (var i = 0; i < children.length; i++) {
@@ -563,20 +581,20 @@
   /**
    * Bind eventlisteners
    */
-  var listeners = function(_this, settings) {
+  var listeners = function (_this, settings) {
     // Check if an item needs to move
     if (window.attachEvent) {
-      window.attachEvent("onresize", function() {
+      window.attachEvent("onresize", function () {
         if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
       });
     } else if (window.addEventListener) {
-      window.addEventListener("resize", function() {
+      window.addEventListener("resize", function () {
         if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
       });
 
       window.addEventListener(
         "orientationchange",
-        function() {
+        function () {
           if (priorityNav.doesItFit) priorityNav.doesItFit(_this);
         },
         true
@@ -586,7 +604,7 @@
     // Toggle dropdown
     _this
       .querySelector(navDropdownToggle)
-      .addEventListener("mousedown", function(event) {
+      .addEventListener("mousedown", function (event) {
         event.stopPropagation();
         toggleClass(_this.querySelector(navDropdown), "show");
         toggleClass(this, "is-open");
@@ -595,42 +613,51 @@
         /**
          * Toggle aria hidden for accessibility
          */
-        if (-1 !== _this.className.indexOf("is-open")) {
-          _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
-        } else {
+        if (_this.classList.contains("is-open")) {
           _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
+
+          updateLabel(_this, settings.navDropdownLabelActive);
+
           _this.querySelector(navDropdown).blur();
+        } else {
+          _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
+
+          updateLabel(_this, settings.navDropdownLabel);
         }
       });
 
-    var lastItemCloseHandler = function(event) {
-      removeClass(_this.querySelector(navDropdown), "show");
-      removeClass(_this.querySelector(navDropdownToggle), "is-open");
-      removeClass(_this, "is-open");
-      _this
-        .querySelector(navDropdown + " li:last-child a")
-        .removeEventListener(blurEventName, lastItemCloseHandler);
+    var lastItemCloseHandler = function (event) {
+      if (!parent(event.relatedTarget, toggleWrapper)) {
+        removeClass(_this.querySelector(navDropdown), "show");
+        removeClass(_this.querySelector(navDropdownToggle), "is-open");
+        removeClass(_this, "is-open");
+        updateLabel(_this, settings.navDropdownLabel);
+        _this
+          .querySelector(navDropdown + " li:last-child a")
+          .removeEventListener(blurEventName, lastItemCloseHandler);
+      }
     };
 
     _this
       .querySelector(navDropdownToggle)
-      .addEventListener("focus", function(event) {
+      .addEventListener("focus", function (event) {
         if (-1 === _this.className.indexOf("is-open")) {
           addClass(_this.querySelector(navDropdown), "show");
           addClass(this, "is-open");
           addClass(_this, "is-open");
+          updateLabel(_this, settings.navDropdownLabelActive);
 
           /**
            * Toggle aria hidden for accessibility
            */
-          _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
+          _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
           _this.querySelector(navDropdown).blur();
         }
       });
 
     _this
       .querySelector(navDropdownToggle)
-      .addEventListener(blurEventName, function(e) {
+      .addEventListener(blurEventName, function (e) {
         if (!parent(e.relatedTarget, toggleWrapper)) {
           // clean up
           document
@@ -641,19 +668,12 @@
           removeClass(this, "is-open");
           removeClass(_this, "is-open");
 
+          updateLabel(_this, settings.navDropdownLabel);
+
           /**
            * Toggle aria hidden for accessibility
            */
-          if (-1 !== _this.className.indexOf("is-open")) {
-            _this
-              .querySelector(navDropdown)
-              .setAttribute("aria-hidden", "false");
-          } else {
-            _this
-              .querySelector(navDropdown)
-              .setAttribute("aria-hidden", "true");
-            _this.querySelector(navDropdown).blur();
-          }
+          _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
         } else {
           document
             .querySelector(navDropdown + " li:last-child a")
@@ -668,7 +688,7 @@
     /*
      * Remove when clicked outside dropdown
      */
-    document.addEventListener("click", function(event) {
+    document.addEventListener("click", function (event) {
       if (
         !getClosest(event.target, "." + settings.navDropdownClassName) &&
         event.target !== _this.querySelector(navDropdownToggle)
@@ -676,13 +696,14 @@
         _this.querySelector(navDropdown).classList.remove("show");
         _this.querySelector(navDropdownToggle).classList.remove("is-open");
         _this.classList.remove("is-open");
+        updateLabel(_this, settings.navDropdownLabel);
       }
     });
 
     /**
      * Remove when escape key is pressed
      */
-    document.onkeydown = function(evt) {
+    document.onkeydown = function (evt) {
       evt = evt || window.event;
       if (evt.keyCode === 27) {
         document.querySelector(navDropdown).classList.remove("show");
@@ -695,12 +716,12 @@
   /**
    * Remove function
    */
-  Element.prototype.remove = function() {
+  Element.prototype.remove = function () {
     this.parentElement.removeChild(this);
   };
 
   /*global HTMLCollection */
-  NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+  NodeList.prototype.remove = HTMLCollection.prototype.remove = function () {
     for (var i = 0, len = this.length; i < len; i++) {
       if (this[i] && this[i].parentElement) {
         this[i].parentElement.removeChild(this[i]);
@@ -712,7 +733,7 @@
    * Destroy the current initialization.
    * @public
    */
-  priorityNav.destroy = function() {
+  priorityNav.destroy = function () {
     // If plugin isn"t already initialized, stop
     if (!settings) return;
     // Remove feedback class
@@ -731,12 +752,12 @@
    * @param r
    */
   if (supports && typeof Node !== "undefined") {
-    Node.prototype.insertAfter = function(n, r) {
+    Node.prototype.insertAfter = function (n, r) {
       this.insertBefore(n, r.nextSibling);
     };
   }
 
-  var checkForSymbols = function(string) {
+  var checkForSymbols = function (string) {
     var firstChar = string.charAt(0);
     if (firstChar === "." || firstChar === "#") {
       return false;
@@ -750,7 +771,7 @@
    * @public
    * @param {Object} options User settings
    */
-  priorityNav.init = function(options) {
+  priorityNav.init = function (options) {
     /**
      * Merge user options with defaults
      * @type {Object}
@@ -783,7 +804,7 @@
     /**
      * Loop over every instance and reference _this
      */
-    forEach(elements, function(_this) {
+    forEach(elements, function (_this) {
       /**
        * Create breaks array
        * @type {number}
