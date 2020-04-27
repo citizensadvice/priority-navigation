@@ -4,7 +4,6 @@
   "version": "1.4.0",
   "main": "dist/priority-nav.js",
   "description": "Priority+ pattern navigation that hides menu items if they don't fit on screen.",
-  "homepage": "http://gijsroge.github.io/priority-nav.js/",
   "author": {
     "name": "Gijs Rogé",
     "url": "http://twitter.com/gijsroge"
@@ -18,20 +17,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/gijsroge/priority-navigation.git"
+    "url": "https://github.com/citizensadvice/priority-navigation.git"
   },
   "keywords": [
     "priority+",
     "responsive",
     "navigation"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/gijsroge/priority-navigation/blob/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/gijsroge/priority-navigation/issues"
-  },
+  "license": "MIT",
   "engines": {
     "node": ">=0.8.0"
   },
