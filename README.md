@@ -1,12 +1,18 @@
+# DEPRECATION WARNING
+
+This package has been deprecated in favour of the CA Design Systems Greedy Nav - please see [Design System](https://github.com/citizensadvice/design-system) for details.
+
 # PriorityNavigation.js
+
 PriorityNav is a pure javascript plugin that will move your menu items if they don't fit its parent.
 ![Priority Navigation demo](http://gijsroge.github.io/priority-nav.js/priority-nav-demo.gif)
 
 #### Take a look at the **[Demo](http://gijsroge.github.io/priority-nav.js/)** site.
 
-----------
+---
 
 ### Features
+
 - **Accessible**<br>Adds appropriate aria attributes and set focus to links when needed.
 - **No dependencies**<br>The plugin is written in pure javascript making it fast and lean.
 - **Breakpoint**<br>When the breakpoint has been reached the plugin will automaticly move all items to the dropdown & change the toggle label to navDropdownBreakpointLabel.
@@ -16,36 +22,42 @@ PriorityNav is a pure javascript plugin that will move your menu items if they d
 - **Callbacks**<br>Callbacks are fired when an item is moved or moved back from the main navigation.
 
 ### Usage
+
 Load plugin files
 
 ```html
 <!DOCTYPE html>
 <head>
-    <link rel="stylesheet" href="priority-nav-core.css">
+  <link rel="stylesheet" href="priority-nav-core.css" />
 </head>
 
 <body>
-    <script async src="priority-nav.js"></script>
+  <script async src="priority-nav.js"></script>
 </body>
 ```
 
 Call plugin without any options.
+
 ```js
 var nav = priorityNav.init();
 ```
+
 Ideal html structure
+
 ```html
 <nav>
-    <ul> <- needs to be inline-block
-        <li>menu item</li>
-        <li>menu item</li>
-        <li>menu item</li>
-        <li>menu item</li>
-    </ul>
+  <ul>
+    <- needs to be inline-block
+    <li>menu item</li>
+    <li>menu item</li>
+    <li>menu item</li>
+    <li>menu item</li>
+  </ul>
 </nav>
 ```
 
 ### Options
+
 ```js
 initClass:                  "js-priorityNav", // Class that will be printed on html element to allow conditional css styling.
 mainNavWrapper:             "nav", // mainnav wrapper selector (must be direct parent from mainNav)
@@ -65,10 +77,12 @@ movedBack: function () {} // executed when item is moved back to main menu
 ```
 
 ### Package managers
+
 - **npm:** `npm install --save priority-nav`
 - **bower:** `bower install priority-nav.js`
 
 ### Building the source files
+
 ```
 #cloning repository
 git clone https://github.com/gijsroge/priority-navigation.git
@@ -82,23 +96,30 @@ grunt build
 ```
 
 ### IE9 Support
+
 To support Internet Explorer 9 and lower [classList.js](https://github.com/remy/polyfills/blob/master/classList.js/) must be added your page.
 
 ```html
-<!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/2014.01.31/classList.min.js"></script><![endif]-->
+<!--[if lt IE 9
+  ]><script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/2014.01.31/classList.min.js"></script
+><![endif]-->
 ```
 
 ### IE8 Support
+
 To support Internet Explorer 8, [es5-shim](https://github.com/kriskowal/es5-shim/) and classList.js from above must be added your page.
 
 ```html
-<!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.0.8/es5-shim.min.js"></script><![endif]-->
+<!--[if lt IE 9
+  ]><script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.0.8/es5-shim.min.js"></script
+><![endif]-->
 ```
 
 ### Alternatives
-* https://github.com/lewie6/ng-priority-nav (angular)
-* https://github.com/matthornsby/priority-navigation (jQuery)
-* https://github.com/352Media/flexMenu (jQuery)
-* https://github.com/VPenkov/okayNav (jQuery)
-* https://github.com/VPenkov/okayNav-vanillaJS (no dependencies)
-* https://github.com/skywalkapps/nav-priority (no dependencies)
+
+- https://github.com/lewie6/ng-priority-nav (angular)
+- https://github.com/matthornsby/priority-navigation (jQuery)
+- https://github.com/352Media/flexMenu (jQuery)
+- https://github.com/VPenkov/okayNav (jQuery)
+- https://github.com/VPenkov/okayNav-vanillaJS (no dependencies)
+- https://github.com/skywalkapps/nav-priority (no dependencies)
